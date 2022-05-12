@@ -118,9 +118,6 @@ void images_compute(struct images *images)
             assert(cache_reds   != NULL);
             assert(cache_greens != NULL);
             assert(cache_blues  != NULL);
-            assert(tone_count_red   != NULL);
-            assert(tone_count_green != NULL);
-            assert(tone_count_blue  != NULL);
 
             for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
             {
@@ -173,10 +170,6 @@ void images_render(struct images *images)
         assert(reds   != NULL);
         assert(greens != NULL);
         assert(blues  != NULL);
-        assert(count_reds      != NULL);
-        assert(count_greens    != NULL);
-        assert(count_blues     != NULL);
-        assert(count_luminancy != NULL);
         assert(width  > 0);
         assert(height > 0);
 
