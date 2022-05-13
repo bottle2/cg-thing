@@ -12,11 +12,11 @@
 *                   http://www.opengl.org/documentation/specs/glut/spec3/node1.html
 **/
 
-
-#include "gl_canvas2d.h"
 #include <GL/glut.h>
 
-int *scrWidth, *scrHeight; //guarda referencia para as variaveis de altura e largura da main()
+#include "gl_canvas2d.h"
+
+static int *scrWidth, *scrHeight; //guarda referencia para as variaveis de altura e largura da main()
 
 //conjunto de cores predefinidas. Pode-se adicionar mais cores.
 float Colors[14][3]=
@@ -37,32 +37,25 @@ float Colors[14][3]=
     {1, 1, 1}, //white
 };
 
-void ConvertMouseCoord(int button, int state, int wheel, int direction, int x, int y);
+static void ConvertMouseCoord(int button, int state, int wheel, int direction, int x, int y);
 
 //funcoes de CALLBACK da biblioteca Glut
 void keyboard(int key);
 void keyboardUp(int key);
-void specialUp(int key);
+static void specialUp(int key, int, int);
 void mouse(int bt, int st, int wheel, int direction, int x, int y);
-void mouseWheelCB(int wheel, int direction, int x, int y);
+static void mouseWheelCB(int wheel, int direction, int x, int y);
 void render();
 
 
-void CV::point(float x, float y)
+void cv_point(float x, float y)
 {
    glBegin(GL_POINTS);
       glVertex2d(x, y);
    glEnd();
 }
 
-void CV::point(Vector2 p)
-{
-   glBegin(GL_POINTS);
-      glVertex2d(p.x, p.y);
-   glEnd();
-}
-
-void CV::line( float x1, float y1, float x2, float y2 )
+void cv_line( float x1, float y1, float x2, float y2 )
 {
    glBegin(GL_LINES);
       glVertex2d(x1, y1);
@@ -70,7 +63,7 @@ void CV::line( float x1, float y1, float x2, float y2 )
    glEnd();
 }
 
-void CV::rect( float x1, float y1, float x2, float y2 )
+void cv_rect( float x1, float y1, float x2, float y2 )
 {
    glBegin(GL_LINE_LOOP);
       glVertex2d(x1, y1);
@@ -80,7 +73,7 @@ void CV::rect( float x1, float y1, float x2, float y2 )
    glEnd();
 }
 
-void CV::rectFill( float x1, float y1, float x2, float y2 )
+void cv_rectFill( float x1, float y1, float x2, float y2 )
 {
    glBegin(GL_QUADS);
       glVertex2d(x1, y1);
@@ -89,17 +82,8 @@ void CV::rectFill( float x1, float y1, float x2, float y2 )
       glVertex2d(x2, y1);
    glEnd();
 }
-void CV::rectFill( Vector2 p1, Vector2 p2 )
-{
-   glBegin(GL_QUADS);
-      glVertex2d(p1.x, p1.y);
-      glVertex2d(p1.x, p2.y);
-      glVertex2d(p2.x, p2.y);
-      glVertex2d(p2.x, p1.y);
-   glEnd();
-}
 
-void CV::polygon(float vx[], float vy[], int elems)
+void cv_polygon(float vx[], float vy[], int elems)
 {
    int cont;
    glBegin(GL_LINE_LOOP);
@@ -110,7 +94,7 @@ void CV::polygon(float vx[], float vy[], int elems)
    glEnd();
 }
 
-void CV::polygonFill(float vx[], float vy[], int elems)
+void cv_polygonFill(float vx[], float vy[], int elems)
 {
    int cont;
    glBegin(GL_POLYGON);
@@ -130,118 +114,119 @@ void CV::polygonFill(float vx[], float vy[], int elems)
 //Para textos de qualidade, ver:
 //  https://www.freetype.org/
 //  http://ftgl.sourceforge.net/docs/html/ftgl-tutorial.html
-void CV::text(float x, float y, const char *t)
+void cv_text(float x, float y, const char *t)
 {
-    int tam = (int)strlen(t);
-    for(int c=0; c < tam; c++)
-    {
-      glRasterPos2i((GLint)x + c*10, (GLint)y);
-      glutBitmapCharacter(GLUT_BITMAP_8_BY_13, t[c]);
-    }
+	int tam = (int)strlen(t);
+	for (int c = 0; c < tam; c++)
+	{
+		glRasterPos2i((GLint)x + c * 10, (GLint)y);
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13, t[c]);
+	}
 }
 
-void CV::clear(float r, float g, float b)
+void cv_clear(float r, float g, float b)
 {
-   glClearColor( r, g, b, 1 );
+	glClearColor(r, g, b, 1);
 }
 
-void CV::circle( float x, float y, float radius, int div )
+void cv_circle( float x, float y, float radius, int div )
 {
-   float ang = 0, x1, y1;
-   float inc = (float)(PI_2/((float)div));
-   glBegin(GL_LINE_LOOP);
-      for(int lado = 1; lado <= div; lado++) //GL_LINE_LOOP desenha um poligono fechado. Liga automaticamente o primeiro e ultimio vertices.
-      {
-         x1 = (float)(cos(ang)*radius);
-         y1 = (float)(sin(ang)*radius);
-         glVertex2d(x1+x, y1+y);
-         ang+=inc;
-      }
-   glEnd();
+	float ang = 0, x1, y1;
+	float inc = (float)(PI_2 / ((float)div));
+	glBegin(GL_LINE_LOOP);
+	for (int lado = 1; lado <= div; lado++) //GL_LINE_LOOP desenha um poligono fechado. Liga automaticamente o primeiro e ultimio vertices.
+	{
+		x1 = (float)(cos(ang) * radius);
+		y1 = (float)(sin(ang) * radius);
+		glVertex2d(x1 + x, y1 + y);
+		ang += inc;
+	}
+	glEnd();
 }
 
-void CV::circleFill( float x, float y, float radius, int div )
+void cv_circleFill( float x, float y, float radius, int div )
 {
-   float ang = 0, x1, y1;
-   float inc = (float)(PI_2/((float)div));
-   glBegin(GL_POLYGON);
-      for(int lado = 1; lado <= div; lado++) //GL_POLYGON desenha um poligono CONVEXO preenchido.
-      {
-         x1 = (float)(cos(ang)*radius);
-         y1 = (float)(sin(ang)*radius);
-         glVertex2d((GLdouble)(x1+x), (GLdouble)(y1+y));
-         ang+=inc;
-      }
-   glEnd();
+	float ang = 0, x1, y1;
+	float inc = (float)(PI_2 / ((float)div));
+	glBegin(GL_POLYGON);
+	for (int lado = 1; lado <= div; lado++) //GL_POLYGON desenha um poligono CONVEXO preenchido.
+	{
+		x1 = (float)(cos(ang) * radius);
+		y1 = (float)(sin(ang) * radius);
+		glVertex2d((GLdouble)(x1 + x), (GLdouble)(y1 + y));
+		ang += inc;
+	}
+	glEnd();
 }
 
 //coordenada de offset para desenho de objetos.
 //nao armazena translacoes cumulativas.
-void CV::translate(float offsetX, float offsetY)
+void cv_translate(float offsetX, float offsetY)
 {
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   glTranslated(offsetX, offsetY, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslated(offsetX, offsetY, 0);
 }
 
-void CV::translate(Vector2 offset)
+void cv_color_rgb(float r, float g, float b)
 {
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   glTranslated(offset.x, offset.y, 0);
+    glColor3d(r, g, b);
 }
 
-void CV::color(float r, float g, float b)
-{
-   glColor3d(r, g, b);
-}
-
-void CV::color(int idx)
+void cv_color_indexed(int idx)
 {
     glColor3fv(Colors[idx]);
 }
 
-void CV::color(float r, float g, float b, float alpha)
+void cv_color_rgba(float r, float g, float b, float alpha)
 {
-   glColor4d(r, g, b, alpha);
+    glColor4d(r, g, b, alpha);
 }
 
-void special(int key, int , int )
+static void special(int key, int unused1, int unused2)
 {
-   keyboard(key+100);
+    (void)unused1;
+    (void)unused2;
+    keyboard(key+100);
 }
 
-void specialUp(int key, int , int )
+static void specialUp(int key, int unused1, int unused2)
 {
-   keyboardUp(key+100);
+    (void)unused1;
+    (void)unused2;
+    keyboardUp(key+100);
 }
 
-void keyb(unsigned char key, int , int )
+static void keyb(unsigned char key, int unused1, int unused2)
 {
-   keyboard(key);
+    (void)unused1;
+    (void)unused2;
+    keyboard(key);
 }
 
-void keybUp(unsigned char key, int , int )
+static void keybUp(unsigned char key, int unused1, int unused2)
 {
-   keyboardUp(key);
+    (void)unused1;
+    (void)unused2;
+    keyboardUp(key);
 }
 
-void mouseClick(int button, int state, int x, int y)
+static void mouseClick(int button, int state, int x, int y)
 {
    ConvertMouseCoord(button, state, -2, -2, x, y);
 }
 
-void mouseWheelCB(int wheel, int direction, int x, int y)
+static void mouseWheelCB(int wheel, int direction, int x, int y)
 {
    ConvertMouseCoord(-2, -2, wheel, direction, x, y);
 }
 
-void motion(int x, int y)
+static void motion(int x, int y)
 {
    ConvertMouseCoord(-2, -2, -2, -2, x, y);
 }
 
-void ConvertMouseCoord(int button, int state, int wheel, int direction, int x, int y)
+static void ConvertMouseCoord(int button, int state, int wheel, int direction, int x, int y)
 {
 #if Y_CANVAS_CRESCE_PARA_CIMA == TRUE
    y = *scrHeight - y; //deve-se inverter a coordenada y do mouse se o y da canvas crescer para cima. O y do mouse sempre cresce para baixo.
@@ -252,7 +237,7 @@ void ConvertMouseCoord(int button, int state, int wheel, int direction, int x, i
 }
 
 //funcao chamada sempre que a tela for redimensionada.
-void reshape (int w, int h)
+static void reshape (int w, int h)
 {
    *scrHeight = h; //atualiza as variaveis da main() com a nova dimensao da tela.
    *scrWidth = w;
@@ -275,13 +260,13 @@ void reshape (int w, int h)
 }
 
 //definicao de valores para limpar buffers
-void inicializa()
+static void inicializa()
 {
    glClearColor(1,1,1,1);
    glPolygonMode(GL_FRONT, GL_FILL);
 }
 
-void display (void)
+static void display (void)
 {
    glClear(GL_COLOR_BUFFER_BIT ); // XXX Interesting line...
 
@@ -297,7 +282,7 @@ void display (void)
 ////////////////////////////////////////////////////////////////////////////////////////
 //  inicializa o OpenGL
 ////////////////////////////////////////////////////////////////////////////////////////
-void CV::init(int *w, int *h, const char *title)
+void cv_init(int *w, int *h, const char *title)
 {
    int argc = 0;
    glutInit(&argc, NULL);
@@ -332,7 +317,7 @@ void CV::init(int *w, int *h, const char *title)
    printf("GL Version: %s", glGetString(GL_VERSION));
 }
 
-void CV::run()
+void cv_run()
 {
    glutMainLoop();
 }

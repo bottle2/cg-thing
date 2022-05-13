@@ -30,18 +30,17 @@ int images_load(struct images *images, char const *pathname, int x, int y)
     assert(pathname != NULL);
     assert(images->n_image < IMAGE_CAPACITY);
 
-    Bmp bmp;
     int image_n = images->n_image;
 
-    if (bmp.load(pathname))
-    {
-        return 1;
-    }
-    // Get image.
+    int            width   = 0;
+    int            height  = 0;
+    unsigned char *data    = bmp_get(pathname, &width, &height);
+    int            n_pixel = width * height;
 
-    int width   = bmp.getWidth();
-    int height  = bmp.getHeight();
-    int n_pixel = width * height;
+    if (NULL == data)
+    {
+        return -1;
+    }
 
     uint8_t *reds         = (uint8_t *)safe_malloc(n_pixel, 1);
     uint8_t *greens       = (uint8_t *)safe_malloc(n_pixel, 1);
@@ -50,7 +49,6 @@ int images_load(struct images *images, char const *pathname, int x, int y)
     float   *cache_greens = (float   *)safe_malloc(n_pixel, sizeof (float));
     float   *cache_blues  = (float   *)safe_malloc(n_pixel, sizeof (float));
 
-    unsigned char *data = bmp.getImage();
 
     for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
     {
@@ -60,6 +58,8 @@ int images_load(struct images *images, char const *pathname, int x, int y)
         // DIB stores pixel as BGR instead of RGB.
     }
     // Read pixels from image.
+
+    free(data);
 
     images->n_image++;
 
@@ -178,8 +178,8 @@ void images_render(struct images *images)
             int pixel_x = pixel_i % width;
             int pixel_y = pixel_i / width;
 
-            CV::color(reds[pixel_i], greens[pixel_i], blues[pixel_i], 20.0f);
-            CV::rectFill(
+            cv_color_rgba(reds[pixel_i], greens[pixel_i], blues[pixel_i], 20.0f);
+            cv_rectFill(
                 (float)(pixel_x + x     + (is_selected ? offset_x : 0)),
                 (float)(pixel_y + y     + (is_selected ? offset_y : 0)),
                 (float)(pixel_x + x + 1 + (is_selected ? offset_x : 0)),
@@ -189,8 +189,8 @@ void images_render(struct images *images)
 
         if (images->is_selecteds[image_i])
         {
-            CV::color(1.0f, 1.0f, 0.0f);
-            CV::rect(
+            cv_color_rgb(1.0f, 1.0f, 0.0f);
+            cv_rect(
                 (float)(x - 5          + (is_selected ? offset_x : 0)),
                 (float)(y - 5          + (is_selected ? offset_y : 0)),
                 (float)(x + width  + 5 + (is_selected ? offset_x : 0)),

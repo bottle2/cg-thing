@@ -15,54 +15,42 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\bmp.cpp">
+    <ClCompile Include="src\bmp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\framebuffer.cpp">
+    <ClCompile Include="src\framebuffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gl_canvas2d.cpp">
+    <ClCompile Include="src\gl_canvas2d.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\grow.cpp">
+    <ClCompile Include="src\grow.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui.cpp">
+    <ClCompile Include="src\gui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\images.cpp">
+    <ClCompile Include="src\images.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\logic.cpp">
+    <ClCompile Include="src\logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="src\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\menus.cpp">
+    <ClCompile Include="src\menus.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\safe.cpp">
+    <ClCompile Include="src\safe.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\select.cpp">
+    <ClCompile Include="src\select.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\gl\freeglut.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gl\freeglut_ext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gl\freeglut_std.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gl\glut.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Bmp.h">
+    <ClInclude Include="src\bmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\expand.h">
@@ -99,9 +87,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

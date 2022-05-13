@@ -4,6 +4,8 @@
 // Handles mouse input regarding images.
 // Detects drags and clicks and manages multiselection.
 
+#include <stdbool.h>
+
 #include "input.h"
 
 enum select_event

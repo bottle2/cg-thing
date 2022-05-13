@@ -110,7 +110,7 @@ void menus_render(struct menus *menus, int screen_height)
 {
     assert(menus->menu_active_id != 0);
 
-    CV::color(FOREGROUND);
+    cv_color_rgb(FOREGROUND);
 
     int actual_item_i = 0;
 
@@ -125,7 +125,7 @@ void menus_render(struct menus *menus, int screen_height)
                          ? menus->items_text_hover[item_i]
                          : menus->items_text[item_i];
 
-        CV::text(0, (float)(screen_height - (actual_item_i + 1) * FONT_HEIGHT), text);
+        cv_text(0, (float)(screen_height - (actual_item_i + 1) * FONT_HEIGHT), text);
 
         actual_item_i++;
     }

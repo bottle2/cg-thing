@@ -18,10 +18,39 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bmp.c" />
+    <ClCompile Include="src\framebuffer.c" />
+    <ClCompile Include="src\gl_canvas2d.c" />
+    <ClCompile Include="src\grow.c" />
+    <ClCompile Include="src\gui.c" />
+    <ClCompile Include="src\images.c" />
+    <ClCompile Include="src\logic.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\menus.c" />
+    <ClCompile Include="src\safe.c" />
+    <ClCompile Include="src\select.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\bmp.h" />
+    <ClInclude Include="src\expand.h" />
+    <ClInclude Include="src\framebuffer.h" />
+    <ClInclude Include="src\gl_canvas2d.h" />
+    <ClInclude Include="src\grow.h" />
+    <ClInclude Include="src\gui.h" />
+    <ClInclude Include="src\images.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\logic.h" />
+    <ClInclude Include="src\menus.h" />
+    <ClInclude Include="src\safe.h" />
+    <ClInclude Include="src\select.h" />
+    <ClInclude Include="src\util.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{6B9B6A12-EE94-449F-82BB-CB04E1AB3902}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,6 +97,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>./include/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>./include/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -76,6 +111,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -91,6 +127,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -101,39 +138,22 @@
       <AdditionalLibraryDirectories>../lib/</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\bmp.cpp" />
-    <ClCompile Include="src\framebuffer.cpp" />
-    <ClCompile Include="src\gl_canvas2d.cpp" />
-    <ClCompile Include="src\grow.cpp" />
-    <ClCompile Include="src\gui.cpp" />
-    <ClCompile Include="src\images.cpp" />
-    <ClCompile Include="src\logic.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\menus.cpp" />
-    <ClCompile Include="src\safe.cpp" />
-    <ClCompile Include="src\select.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\gl\freeglut.h" />
-    <ClInclude Include="include\gl\freeglut_ext.h" />
-    <ClInclude Include="include\gl\freeglut_std.h" />
-    <ClInclude Include="include\gl\glut.h" />
-    <ClInclude Include="src\Bmp.h" />
-    <ClInclude Include="src\expand.h" />
-    <ClInclude Include="src\framebuffer.h" />
-    <ClInclude Include="src\gl_canvas2d.h" />
-    <ClInclude Include="src\grow.h" />
-    <ClInclude Include="src\gui.h" />
-    <ClInclude Include="src\images.h" />
-    <ClInclude Include="src\input.h" />
-    <ClInclude Include="src\logic.h" />
-    <ClInclude Include="src\menus.h" />
-    <ClInclude Include="src\safe.h" />
-    <ClInclude Include="src\select.h" />
-    <ClInclude Include="src\util.h" />
-    <ClInclude Include="src\Vector2.h" />
-  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../lib/</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../lib/</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

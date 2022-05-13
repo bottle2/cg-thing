@@ -19,7 +19,7 @@ static struct gui gui;
 
 void render(void)
 {
-    CV::clear(BACKGROUND);
+    cv_clear(BACKGROUND);
 
     gui_dimensions(&gui, screen_width, screen_height);
     gui_render(&gui);
@@ -57,9 +57,9 @@ int main(void)
 
     logic(&gui);
 
-    CV::init(&screen_width, &screen_height, "Manipulação de imagens");
+    cv_init(&screen_width, &screen_height, "Manipulação de imagens");
 
-    CV::run();
+    cv_run();
 
     gui_deinit(&gui);
 
