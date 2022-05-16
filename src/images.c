@@ -9,6 +9,7 @@
 #include "gl_canvas2d.h"
 
 #include "bmp.h"
+#include "framebuffer.h"
 #include "images.h"
 #include "safe.h"
 #include "select.h"
@@ -147,7 +148,7 @@ void images_compute(struct images *images)
     }
 }
 
-void images_render(struct images *images)
+void images_render(struct images *images, int screen_width, int screen_height)
 {
     assert(images != NULL);
     assert(images->n_image >= 0);
@@ -155,7 +156,15 @@ void images_render(struct images *images)
     int offset_x = images->is_moving ? images->select.offset_x : 0;
     int offset_y = images->is_moving ? images->select.offset_y : 0;
 
+    struct framebuffer framebuffer = { 0 };
+
+    framebuffer_init(&framebuffer, screen_width, screen_height);
+
+#if 0
     for (int image_i = 0; image_i < images->n_image; image_i++)
+#else
+    for (int image_i = images->n_image; image_i >= 0; image_i--)
+#endif
     {
         float *reds   = images->per_image_cache_reds[image_i];
         float *greens = images->per_image_cache_greens[image_i];
@@ -173,6 +182,7 @@ void images_render(struct images *images)
         assert(width  > 0);
         assert(height > 0);
 
+#if 0
         for (int pixel_i = 0; pixel_i < width * height; pixel_i++)
         {
             int pixel_x = pixel_i % width;
@@ -186,6 +196,33 @@ void images_render(struct images *images)
                 (float)(pixel_y + y + 1 + (is_selected ? offset_y : 0))
             );
         }
+#else
+        framebuffer_burn(
+            &framebuffer,
+            width,
+            height,
+            x + (is_selected ? offset_x : 0),
+            y + (is_selected ? offset_y : 0),
+            reds,
+            greens,
+            blues
+        );
+#endif
+    }
+
+    framebuffer_render(&framebuffer);
+    framebuffer_free(&framebuffer);
+
+    for (int image_i = 0; image_i < images->n_image; image_i++)
+    {
+        int    width  = images->widths[image_i];
+        int    height = images->heights[image_i];
+        int    x      = images->xs[image_i] - images->widths[image_i]  / 2;
+        int    y      = images->ys[image_i] - images->heights[image_i] / 2;
+        bool   is_selected = images->is_selecteds[image_i];
+
+        assert(width  > 0);
+        assert(height > 0);
 
         if (images->is_selecteds[image_i])
         {
@@ -198,8 +235,6 @@ void images_render(struct images *images)
             );
         }
     }
-
-    // TODO apply transformation matrix.
 }
 
 void images_free(struct images *images)

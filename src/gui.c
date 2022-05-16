@@ -82,5 +82,5 @@ void gui_dimensions(struct gui *gui, int screen_width, int screen_height)
 void gui_render(struct gui *gui)
 {
     menus_render(&(gui->menus), gui->screen_height);
-    images_render(&(gui->images));
+    images_render(&(gui->images), gui->screen_width, gui->screen_height);
 }

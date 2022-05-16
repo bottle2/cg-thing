@@ -49,7 +49,7 @@ struct images
 void images_init   (struct images *images);
 int  images_load   (struct images *images, char const *pathname, int x, int y);
 void images_compute(struct images *images);
-void images_render (struct images *images);
+void images_render (struct images *images, int screen_width, int screen_height);
 void images_free   (struct images *images);
 int  images_trace  (struct images *images, int x, int y);
 void images_click  (struct images *images, int x, int y
@@ -60,6 +60,5 @@ void images_toggle   (struct images *images, enum channel channel);
 void images_reset    (struct images *images);
 void images_grayscale(struct images *images);
 void images_invert   (struct images *images);
-void images_histogram(struct images *images);
 
 #endif // __T1__IMAGES__H__
