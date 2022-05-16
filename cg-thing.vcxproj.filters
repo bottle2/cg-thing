@@ -24,9 +24,6 @@
     <ClCompile Include="src\gl_canvas2d.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\grow.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,6 +45,9 @@
     <ClCompile Include="src\select.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\table.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bmp.h">
@@ -60,9 +60,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gl_canvas2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\grow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui.h">
@@ -87,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

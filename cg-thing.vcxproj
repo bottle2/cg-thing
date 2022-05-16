@@ -22,7 +22,6 @@
     <ClCompile Include="src\bmp.c" />
     <ClCompile Include="src\framebuffer.c" />
     <ClCompile Include="src\gl_canvas2d.c" />
-    <ClCompile Include="src\grow.c" />
     <ClCompile Include="src\gui.c" />
     <ClCompile Include="src\images.c" />
     <ClCompile Include="src\logic.c" />
@@ -30,13 +29,13 @@
     <ClCompile Include="src\menus.c" />
     <ClCompile Include="src\safe.c" />
     <ClCompile Include="src\select.c" />
+    <ClCompile Include="src\table.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bmp.h" />
     <ClInclude Include="src\expand.h" />
     <ClInclude Include="src\framebuffer.h" />
     <ClInclude Include="src\gl_canvas2d.h" />
-    <ClInclude Include="src\grow.h" />
     <ClInclude Include="src\gui.h" />
     <ClInclude Include="src\images.h" />
     <ClInclude Include="src\input.h" />
@@ -44,6 +43,7 @@
     <ClInclude Include="src\menus.h" />
     <ClInclude Include="src\safe.h" />
     <ClInclude Include="src\select.h" />
+    <ClInclude Include="src\table.h" />
     <ClInclude Include="src\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -105,7 +105,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -122,7 +122,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
