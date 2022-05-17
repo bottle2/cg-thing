@@ -6,6 +6,7 @@
 #include "gl_canvas2d.h"
 
 #include "menus.h"
+#include "util.h"
 
 #define FOREGROUND 1.0f, 1.0f, 1.0f
 
@@ -16,6 +17,8 @@ void menus_init(struct menus *menus)
     menus->absolute_item_i_chosen = -1;
 
     menus->max_item = 0;
+
+    menus->width = 0;
 
     for (int item_i = 0; item_i < ITEM_CAPACITY; item_i++)
     {
@@ -47,8 +50,9 @@ void menus_add_text(struct menus *menus, int menu_id, char const *text)
     menus->items_text_hover[item_i] = NULL;
     menus->items_callback[item_i]   = NULL;
     menus->items_data_id[item_i]    = -1;
-    menus->items_width[item_i]      = -1;
     // Paranoia.
+
+    menus->width = MAX_2(menus->width, strlen(text));
 }
 
 
@@ -64,7 +68,6 @@ void menus_add_button(
     assert(menu_id != ITEM_ID_UNNOCUPIED);
     assert(text       != NULL);
     assert(text_hover != NULL);
-    assert(strlen(text) == strlen(text_hover));
     assert(callback != NULL);
     assert(data_id >= 0);
     assert(data_id <  DATA_CAPACITY);
@@ -77,7 +80,9 @@ void menus_add_button(
     menus->items_text_hover[item_i] = text_hover;
     menus->items_callback[item_i]   = callback;
     menus->items_data_id[item_i]    = data_id;
-    menus->items_width[item_i]      = strlen(text) * (FONT_WIDTH + FONT_KERNING);
+
+    menus->width = MAX_2(menus->width, strlen(text      ));
+    menus->width = MAX_2(menus->width, strlen(text_hover));
 }
 
 void menus_clear(struct menus *menus, int menu_id)
@@ -95,7 +100,6 @@ void menus_clear(struct menus *menus, int menu_id)
             menus->items_text_hover[item_i] = NULL;
             menus->items_callback[item_i]   = NULL;
             menus->items_data_id[item_i]    = -1;
-            menus->items_width[item_i]      = -1;
 
             if (item_i == menus->max_item - 1)
             {
@@ -104,6 +108,8 @@ void menus_clear(struct menus *menus, int menu_id)
             // Decrease `max_item` if removing the last item.
         }
     }
+
+    // TODO Update `menus->width`.
 }
 
 void menus_render(struct menus *menus, int screen_height)
@@ -141,7 +147,7 @@ int menus_trace(struct menus *menus, int screen_height, int x, int y)
     {
         if (menus->items_menu_id[item_i] & menus->menu_active_id)
         {
-            if(x < menus->items_width[item_i] && relative_y == relative_i)
+            if(x < menus->width * (FONT_WIDTH + FONT_KERNING) && relative_y == relative_i && ITEM_BUTTON == menus->items_type[item_i])
             {
                 menus->absolute_item_i_chosen = item_i;
                 return item_i;

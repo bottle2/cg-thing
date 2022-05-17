@@ -40,7 +40,7 @@ struct menus
     // It is not tracked how many items are there, let alone for each list.
     // TODO Update long comment.
 
-    int items_width[ITEM_CAPACITY];
+    int width;
 };
 
 void menus_init(struct menus *menus);

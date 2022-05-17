@@ -153,7 +153,7 @@ void logic(struct gui *gui)
     menus_add_text  (menus, HELP, "Hold Shift to select multiple images.");
     menus_add_text  (menus, HELP, "Images are loaded on top of each other.");
     menus_add_text  (menus, HELP, "Move images apart to show the hidden ones.");
-    menus_add_text  (menus, HELP, "Images start selected, so click outside otherwise they will move together.");
+    menus_add_text  (menus, HELP, "Images start selected, click outside to deselect.");
     menus_add_text  (menus, HELP, "Press Q or Esc to exit.");
     menus_add_text  (menus, HELP, "Histograms are in logarithm scale.");
 
