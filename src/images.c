@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
-
 #include "gl_canvas2d.h"
 
 #include "bmp.h"
@@ -14,6 +12,7 @@
 #include "input.h"
 #include "safe.h"
 #include "select.h"
+#include "sources.h"
 
 void images_init(struct images *images)
 {
@@ -23,7 +22,8 @@ void images_init(struct images *images)
     images->n_selected = 0;
     images->is_moving  = false;
 
-    select_init(&(images->select));
+    select_init (&(images->select ));
+    sources_init(&(images->sources));
 }
 
 int images_load(struct images *images, char const *pathname, int x, int y)
@@ -32,61 +32,39 @@ int images_load(struct images *images, char const *pathname, int x, int y)
     assert(pathname != NULL);
     assert(images->n_image < IMAGE_CAPACITY);
 
-    int image_n = images->n_image;
+    int source_i = sources_load(&(images->sources), pathname);
 
-    int            width   = 0;
-    int            height  = 0;
-    unsigned char *data    = bmp_get(pathname, &width, &height);
-    int            n_pixel = width * height;
-
-    if (NULL == data)
+    if (-1 == source_i)
     {
         return -1;
     }
 
-    uint8_t *reds         = (uint8_t *)safe_malloc(n_pixel, 1);
-    uint8_t *greens       = (uint8_t *)safe_malloc(n_pixel, 1);
-    uint8_t *blues        = (uint8_t *)safe_malloc(n_pixel, 1);
-    float   *cache_reds   = (float   *)safe_malloc(n_pixel, sizeof (float));
-    float   *cache_greens = (float   *)safe_malloc(n_pixel, sizeof (float));
-    float   *cache_blues  = (float   *)safe_malloc(n_pixel, sizeof (float));
+    int image_n = images->n_image;
 
+    int n_pixel = images->sources.widths[source_i] * images->sources.heights[source_i];
 
-    for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
-    {
-        reds[pixel_i]   = data[pixel_i * 3 + 2];
-        greens[pixel_i] = data[pixel_i * 3 + 1];
-        blues[pixel_i]  = data[pixel_i * 3 + 0];
-        // DIB stores pixel as BGR instead of RGB.
-    }
-    // Read pixels from image.
-
-    free(data);
+    float *cache_reds   = (float *)safe_malloc(n_pixel, sizeof (float));
+    float *cache_greens = (float *)safe_malloc(n_pixel, sizeof (float));
+    float *cache_blues  = (float *)safe_malloc(n_pixel, sizeof (float));
 
     images->n_image++;
 
-    images->per_image_reds[image_n]         = reds;
-    images->per_image_greens[image_n]       = greens;
-    images->per_image_blues[image_n]        = blues;
-    images->per_image_cache_reds[image_n]   = cache_reds;
+    images->per_image_source_i    [image_n] = source_i;
+    images->per_image_cache_reds  [image_n] = cache_reds;
     images->per_image_cache_greens[image_n] = cache_greens;
-    images->per_image_cache_blues[image_n]  = cache_blues;
+    images->per_image_cache_blues [image_n] = cache_blues;
 
     images->actives_red  [image_n] = true;
     images->actives_green[image_n] = true;
     images->actives_blue [image_n] = true;
 
-    images->widths[image_n]  = width;
-    images->heights[image_n] = height;
-    images->xs[image_n]      = x;
-    images->ys[image_n]      = y;
+    images->xs[image_n] = x;
+    images->ys[image_n] = y;
 
     images->n_selected++;
     images->is_selecteds[image_n] = true;
-    images_compute(images);
 
-    images->pathnames[image_n] = (char *)safe_malloc(strlen(pathname) + 1, 1);
-    memcpy(images->pathnames[image_n], pathname, strlen(pathname) + 1);
+    images_compute(images);
 
     return 0;
 }
@@ -97,20 +75,24 @@ void images_compute(struct images *images)
     {
         if (images->is_selecteds[image_i])
         {
-            int      width   = images->widths [image_i];
-            int      height  = images->heights[image_i];
-            int      n_pixel = width * height;
-            uint8_t *reds    = images->per_image_reds  [image_i];
-            uint8_t *greens  = images->per_image_greens[image_i];
-            uint8_t *blues   = images->per_image_blues [image_i];
-            float   *cache_reds   = images->per_image_cache_reds  [image_i];
-            float   *cache_greens = images->per_image_cache_greens[image_i];
-            float   *cache_blues  = images->per_image_cache_blues [image_i];
-            bool     active_red   = images->actives_red[image_i];
-            bool     active_green = images->actives_green[image_i];
-            bool     active_blue  = images->actives_blue[image_i];
-            bool     is_grayscale = images->grayscales[image_i];
-            bool     is_inverted  = images->inverteds[image_i];
+            int source_i = images->per_image_source_i[image_i];
+            int width    = images->sources.widths [source_i];
+            int height   = images->sources.heights[source_i];
+            int n_pixel  = width * height;
+
+            uint8_t *reds   = images->sources.per_image_reds  [source_i];
+            uint8_t *greens = images->sources.per_image_greens[source_i];
+            uint8_t *blues  = images->sources.per_image_blues [source_i];
+
+            float *cache_reds   = images->per_image_cache_reds  [image_i];
+            float *cache_greens = images->per_image_cache_greens[image_i];
+            float *cache_blues  = images->per_image_cache_blues [image_i];
+
+            bool active_red   = images->actives_red  [image_i];
+            bool active_green = images->actives_green[image_i];
+            bool active_blue  = images->actives_blue [image_i];
+            bool is_grayscale = images->grayscales   [image_i];
+            bool is_inverted  = images->inverteds    [image_i];
 
             assert(width  > 0);
             assert(height > 0);
@@ -123,9 +105,9 @@ void images_compute(struct images *images)
 
             for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
             {
-                cache_reds[pixel_i]   = active_red   ? (float)reds[pixel_i]   / 255.0f : 0.0f;
+                cache_reds  [pixel_i] = active_red   ? (float)reds[pixel_i]   / 255.0f : 0.0f;
                 cache_greens[pixel_i] = active_green ? (float)greens[pixel_i] / 255.0f : 0.0f;
-                cache_blues[pixel_i]  = active_blue  ? (float)blues[pixel_i]  / 255.0f : 0.0f;
+                cache_blues [pixel_i] = active_blue  ? (float)blues[pixel_i]  / 255.0f : 0.0f;
 
                 if (is_grayscale)
                 {
@@ -167,10 +149,11 @@ void images_render(struct images *images, union vector screen)
         float *greens = images->per_image_cache_greens[image_i];
         float *blues  = images->per_image_cache_blues[image_i];
 
-        int    width  = images->widths[image_i];
-        int    height = images->heights[image_i];
-        int    x      = images->xs[image_i] - images->widths[image_i]  / 2;
-        int    y      = images->ys[image_i] - images->heights[image_i] / 2;
+        int    source_i    = images->per_image_source_i[image_i];
+        int    width       = images->sources.widths [source_i];
+        int    height      = images->sources.heights[source_i];
+        int    x           = images->xs[image_i] - width  / 2;
+        int    y           = images->ys[image_i] - height / 2;
         bool   is_selected = images->is_selecteds[image_i];
 
         assert(reds   != NULL);
@@ -196,10 +179,11 @@ void images_render(struct images *images, union vector screen)
 
     for (int image_i = 0; image_i < images->n_image; image_i++)
     {
-        int    width  = images->widths[image_i];
-        int    height = images->heights[image_i];
-        int    x      = images->xs[image_i] - images->widths[image_i]  / 2;
-        int    y      = images->ys[image_i] - images->heights[image_i] / 2;
+        int    source_i    = images->per_image_source_i[image_i];
+        int    width       = images->sources.widths [source_i];
+        int    height      = images->sources.heights[source_i];
+        int    x           = images->xs[image_i] - width  / 2;
+        int    y           = images->ys[image_i] - height / 2;
         bool   is_selected = images->is_selecteds[image_i];
 
         assert(width  > 0);
@@ -226,16 +210,14 @@ void images_free(struct images *images)
     {
         free(images->pathnames[image_i]);
 
-        free(images->per_image_reds  [image_i]);
-        free(images->per_image_greens[image_i]);
-        free(images->per_image_blues [image_i]);
-
         free(images->per_image_cache_reds  [image_i]);
         free(images->per_image_cache_greens[image_i]);
         free(images->per_image_cache_blues [image_i]);
     }
 
     images->n_image = 0;
+
+    sources_free(&(images->sources));
 }
 
 int images_mouse(struct images *images, union vector screen, struct input_mouse mouse, enum input_state shift)
@@ -244,10 +226,11 @@ int images_mouse(struct images *images, union vector screen, struct input_mouse 
 
     for (int image_i = images->n_image - 1; image_i >= 0; image_i--)
     {
-        int width   = images->widths[image_i];
-        int height  = images->heights[image_i];
-        int image_x = images->xs[image_i];
-        int image_y = images->ys[image_i];
+        int source_i = images->per_image_source_i[image_i];
+        int width    = images->sources.widths [source_i];
+        int height   = images->sources.heights[source_i];
+        int image_x  = images->xs[image_i];
+        int image_y  = images->ys[image_i];
 
         bool within_x = mouse.x <= image_x + width  / 2.0f && mouse.x >= image_x - width  / 2.0f;
         bool within_y = mouse.y <= image_y + height / 2.0f && mouse.y >= image_y - height / 2.0f;
@@ -259,6 +242,7 @@ int images_mouse(struct images *images, union vector screen, struct input_mouse 
         }
     }
     // Checks if mouse is hovering any image.
+    // TODO We are not considering moving images, which use the offset thing.
 
     struct select *select            = &(images->select);
     bool           is_hovering       = hovered_i != -1;

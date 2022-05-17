@@ -10,31 +10,29 @@ void sources_init(struct sources *sources)
 {
     assert(sources != NULL);
 
-    int    n_column    =   SOURCES_TABLE_XS(NOTHING  , AS_ONE      , SUM  )  ;
-    int    row_sizes[] = { SOURCES_TABLE_XS(NOTHING  , AS_SIZE     , COMMA) };
-    void **columns[]   = { SOURCES_TABLE_XS(sources->, AS_ADDRESSES, COMMA) };
-
-    table_init(&(sources->table), n_column, 0, row_sizes, columns, true);
+    for (int source_i = 0; source_i < SOURCES_CAPACITY; source_i++)
+    {
+        sources->widths          [source_i] = 0;
+        sources->heights         [source_i] = 0;
+        sources->names           [source_i] = NULL;
+        sources->per_image_reds  [source_i] = NULL;
+        sources->per_image_greens[source_i] = NULL;
+        sources->per_image_blues [source_i] = NULL;
+        sources->kinds           [source_i] = SOURCE_AVAILABLE;
+    }
 }
 
 void sources_free(struct sources *sources)
 {
     assert(sources != NULL);
 
-    for (int source_i = 0; source_i < sources->table.capacity; source_i++)
+    for (int source_i = 0; source_i < SOURCES_CAPACITY; source_i++)
     {
-        if (!(sources->table.are_available[source_i]))
+        if (sources->kinds[source_i] != SOURCE_AVAILABLE )
         {
-            free(sources->per_image_reds[source_i]);
-            free(sources->per_image_greens[source_i]);
-            free(sources->per_image_blues[source_i]);
-            free(sources->pathnames[source_i]);
-
-            table_release(&(sources->table), source_i);
+            sources_unload(sources, source_i);
         }
     }
-
-    table_free(&(sources->table));
 }
 
 int sources_load(struct sources *sources, char *pathname)
@@ -42,7 +40,31 @@ int sources_load(struct sources *sources, char *pathname)
     assert(sources  != NULL);
     assert(pathname != NULL);
 
-    int source_i = table_next(&(sources->table));
+    int source_i = -1;
+
+    for (int candidate_i = 0; candidate_i < SOURCES_CAPACITY; candidate_i++)
+    {
+        enum source  kind = sources->kinds[candidate_i];
+        char        *name = sources->names[candidate_i];
+
+        if (SOURCE_FILE == kind && !strcmp(pathname, name))
+        {
+            source_i = candidate_i;
+            break;
+        }
+        // We prioritize existing sources.
+
+        if (-1 == source_i && SOURCE_AVAILABLE == kind)
+        {
+            source_i = candidate_i;
+        }
+        // Find first available source.
+    }
+
+    if (-1 == source_i)
+    {
+        return -1;
+    }
 
     int            width   = 0;
     int            height  = 0;
@@ -69,14 +91,25 @@ int sources_load(struct sources *sources, char *pathname)
 
     free(data);
 
+    if (SOURCE_FILE == sources->kinds[source_i])
+    {
+        free(sources->per_image_reds  [source_i]);
+        free(sources->per_image_greens[source_i]);
+        free(sources->per_image_blues [source_i]);
+    }
+    else
+    {
+        sources->kinds[source_i] = SOURCE_FILE;
+        sources->names[source_i] = safe_malloc(strlen(pathname) + 1, 1);
+
+        memcpy(sources->names[source_i], pathname, strlen(pathname) + 1);
+    }
+
+    sources->heights         [source_i] = height;
+    sources->widths          [source_i] = width;
     sources->per_image_reds  [source_i] = reds;
     sources->per_image_greens[source_i] = greens;
     sources->per_image_blues [source_i] = blues;
-    sources->heights         [source_i] = height;
-    sources->widths          [source_i] = width;
-
-    sources->pathnames[source_i] = safe_malloc(strlen(pathname) + 1, 1);
-    memcpy(sources->pathnames[source_i], pathname, strlen(pathname) + 1);
 
     return source_i;
 }
@@ -84,18 +117,19 @@ int sources_load(struct sources *sources, char *pathname)
 void sources_unload(struct sources *sources, int source_i)
 {
     assert(sources != NULL);
-
-    table_release(&(sources->table), source_i);
+    assert(sources->kinds[source_i] != SOURCE_AVAILABLE);
 
     free(sources->per_image_reds  [source_i]);
     free(sources->per_image_greens[source_i]);
     free(sources->per_image_blues [source_i]);
-    free(sources->pathnames       [source_i]);
+    free(sources->names           [source_i]);
 
-    sources->widths [source_i] = 0;
-    sources->heights[source_i] = 0;
-    sources->per_image_reds   = NULL;
-    sources->per_image_greens = NULL;
-    sources->per_image_blues  = NULL;
-    sources->pathnames        = NULL;
+    sources->widths          [source_i] = 0;
+    sources->heights         [source_i] = 0;
+    sources->per_image_reds  [source_i] = NULL;
+    sources->per_image_greens[source_i] = NULL;
+    sources->per_image_blues [source_i] = NULL;
+    sources->names           [source_i] = NULL;
+
+    sources->kinds[source_i] = SOURCE_AVAILABLE;
 }

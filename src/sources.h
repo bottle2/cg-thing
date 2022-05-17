@@ -3,21 +3,19 @@
 
 #include <stdint.h>
 
-#include "expand.h"
-#include "table.h"
+#define SOURCES_CAPACITY 256
 
-#define SOURCES_TABLE_XS(A, X, S) \
-X(A, char    *, pathnames       )S \
-X(A, int      , widths          )S \
-X(A, int      , heights         )S \
-X(A, uint8_t *, per_image_reds  )S \
-X(A, uint8_t *, per_image_greens)S \
-X(A, uint8_t *, per_image_blues )
+enum source { SOURCE_AVAILABLE, SOURCE_FILE, SOURCE_PROCEDURAL, };
 
 struct sources
 {
-    SOURCES_TABLE_XS(NOTHING, AS_COLUMN, SEMICOLON);
-    struct table table;
+    char        *names           [SOURCES_CAPACITY];
+    int          widths          [SOURCES_CAPACITY];
+    int          heights         [SOURCES_CAPACITY];
+    uint8_t     *per_image_reds  [SOURCES_CAPACITY];
+    uint8_t     *per_image_greens[SOURCES_CAPACITY];
+    uint8_t     *per_image_blues [SOURCES_CAPACITY];
+    enum source  kinds           [SOURCES_CAPACITY];
 };
 
 void sources_init  (struct sources *sources);

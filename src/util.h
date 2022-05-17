@@ -7,4 +7,4 @@
 
 #define MAX_2(A, B) ((A) > (B) ? (A) : (B))
 
-#endif
+#endif // __T2__UTIL__H__

@@ -45,6 +45,9 @@
     <ClCompile Include="src\select.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\sources.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bmp.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

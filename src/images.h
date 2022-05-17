@@ -9,6 +9,7 @@
 
 #include "input.h"
 #include "select.h"
+#include "sources.h"
 #include "vector.h"
 
 #define IMAGE_CAPACITY 256
@@ -21,17 +22,16 @@ struct images
     int   n_image;
     char *pathnames[IMAGE_CAPACITY];
 
-    int widths [IMAGE_CAPACITY];
-    int heights[IMAGE_CAPACITY];
-    int xs     [IMAGE_CAPACITY];
-    int ys     [IMAGE_CAPACITY];
+    struct sources sources;
 
-    uint8_t *per_image_reds        [IMAGE_CAPACITY];
-    uint8_t *per_image_greens      [IMAGE_CAPACITY];
-    uint8_t *per_image_blues       [IMAGE_CAPACITY];
-    float   *per_image_cache_reds  [IMAGE_CAPACITY];
-    float   *per_image_cache_greens[IMAGE_CAPACITY];
-    float   *per_image_cache_blues [IMAGE_CAPACITY];
+    int xs[IMAGE_CAPACITY];
+    int ys[IMAGE_CAPACITY];
+
+    int per_image_source_i[IMAGE_CAPACITY];
+
+    float *per_image_cache_reds  [IMAGE_CAPACITY];
+    float *per_image_cache_greens[IMAGE_CAPACITY];
+    float *per_image_cache_blues [IMAGE_CAPACITY];
 
     bool actives_red  [IMAGE_CAPACITY];
     bool actives_green[IMAGE_CAPACITY];

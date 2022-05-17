@@ -29,6 +29,7 @@
     <ClCompile Include="src\menus.c" />
     <ClCompile Include="src\safe.c" />
     <ClCompile Include="src\select.c" />
+    <ClCompile Include="src\sources.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bmp.h" />
@@ -42,6 +43,7 @@
     <ClInclude Include="src\menus.h" />
     <ClInclude Include="src\safe.h" />
     <ClInclude Include="src\select.h" />
+    <ClInclude Include="src\sources.h" />
     <ClInclude Include="src\util.h" />
     <ClInclude Include="src\vector.h" />
   </ItemGroup>
