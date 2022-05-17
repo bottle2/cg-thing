@@ -163,7 +163,7 @@ void images_render(struct images *images, int screen_width, int screen_height)
 #if 0
     for (int image_i = 0; image_i < images->n_image; image_i++)
 #else
-    for (int image_i = images->n_image; image_i >= 0; image_i--)
+    for (int image_i = images->n_image - 1; image_i >= 0; image_i--)
 #endif
     {
         float *reds   = images->per_image_cache_reds[image_i];
@@ -261,7 +261,7 @@ int images_trace(struct images *images, int x, int y)
 {
     images->hovered_i = -1;
 
-    for (int image_i = images->n_image; image_i >= 0; image_i--)
+    for (int image_i = images->n_image - 1; image_i >= 0; image_i--)
     {
         int width   = images->widths[image_i];
         int height  = images->heights[image_i];

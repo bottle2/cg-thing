@@ -12,11 +12,6 @@
 #define AS_NEXT_ACTION(MATRIX, STATE, EVENT, NEXT_STATE, ACTION) MATRIX[STATE][EVENT] = ACTION;
 // State machine stuff.
 
-#define AS_COLUMN(   ACCESSOR, TYPE, SYMBOL) TYPE *SYMBOL
-#define AS_SIZE(     ACCESSOR, TYPE, SYMBOL) sizeof (TYPE)
-#define AS_ADDRESSES(ACCESSOR, TYPE, SYMBOL) &((void *)(ACCESSOR SYMBOL))
-// `table` module stuff, see `table.h`.
-
 #define AS_ONE(...) 1
 
 #endif // __T1__EXPAND__H__

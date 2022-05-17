@@ -1,21 +1,16 @@
 #ifndef __T2__FRAMEBUFFER__H__
 #define __T2__FRAMEBUFFER__H__
 
-#include "expand.h"
-#include "table.h"
-
-#define FRAMEBUFFER_TABLE_XS(A, X, S) \
-X(A, float, reds    )S \
-X(A, float, greens  )S \
-X(A, float, blues   )S \
-X(A, bool , z_buffer)
+#include <stdbool.h>
 
 struct framebuffer
 {
-    int width;
-    int height;
-    FRAMEBUFFER_TABLE_XS(NOTHING, AS_COLUMN, SEMICOLON);
-    struct table table;
+    int    width;
+    int    height;
+    float *reds;
+    float *greens;
+    float *blues;
+    bool  *z_buffer;
 };
 // Pixels are stored from bottom-left to upper-right.
 

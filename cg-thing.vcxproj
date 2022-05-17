@@ -29,7 +29,6 @@
     <ClCompile Include="src\menus.c" />
     <ClCompile Include="src\safe.c" />
     <ClCompile Include="src\select.c" />
-    <ClCompile Include="src\table.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bmp.h" />
@@ -43,7 +42,6 @@
     <ClInclude Include="src\menus.h" />
     <ClInclude Include="src\safe.h" />
     <ClInclude Include="src\select.h" />
-    <ClInclude Include="src\table.h" />
     <ClInclude Include="src\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -57,6 +55,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
+    <EnableASAN>true</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>

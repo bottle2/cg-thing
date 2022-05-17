@@ -3,8 +3,8 @@
 
 #include "gl_canvas2d.h"
 
-#include "expand.h"
 #include "framebuffer.h"
+#include "safe.h"
 
 void framebuffer_init(struct framebuffer *framebuffer, int width, int height)
 {
@@ -12,14 +12,14 @@ void framebuffer_init(struct framebuffer *framebuffer, int width, int height)
     assert(width  > 0);
     assert(height > 0);
 
-    int    n_column    =   FRAMEBUFFER_TABLE_XS(NOTHING      , AS_ONE      , SUM  )  ;
-    int    row_sizes[] = { FRAMEBUFFER_TABLE_XS(NOTHING      , AS_SIZE     , COMMA) };
-    void **columns[]   = { FRAMEBUFFER_TABLE_XS(framebuffer->, AS_ADDRESSES, COMMA) };
+    int n_pixel = width * height;
 
-    table_init(&(framebuffer->table), n_column, width * height, row_sizes, columns, false);
-
-    framebuffer->width  = width;
-    framebuffer->height = height;
+    framebuffer->width    = width;
+    framebuffer->height   = height;
+    framebuffer->reds     = safe_malloc(n_pixel, sizeof (float));
+    framebuffer->greens   = safe_malloc(n_pixel, sizeof (float));
+	framebuffer->blues    = safe_malloc(n_pixel, sizeof (float)); 
+    framebuffer->z_buffer = safe_malloc(n_pixel, sizeof (bool ));
 
     framebuffer_clear(framebuffer);
 }
@@ -28,16 +28,22 @@ void framebuffer_free(struct framebuffer *framebuffer)
 {
     assert(framebuffer != NULL);
 
-    table_free(&(framebuffer->table));
+    free(framebuffer->reds    );
+    free(framebuffer->greens  );
+    free(framebuffer->blues   );
+	free(framebuffer->z_buffer);
+
+    framebuffer->width    = 0;
+    framebuffer->height   = 0;
+    framebuffer->reds     = NULL;
+    framebuffer->greens   = NULL;
+    framebuffer->blues    = NULL;
+    framebuffer->z_buffer = NULL;
 }
 
 void framebuffer_resize(struct framebuffer *framebuffer, int width, int height)
 {
-    assert(framebuffer != NULL);
-    assert(width  > 0);
-    assert(height > 0);
-
-    struct framebuffer new_framebuffer = { 0 };
+    struct framebuffer new_framebuffer = {0};
 
     framebuffer_init(&new_framebuffer, width, height);
 
@@ -45,14 +51,14 @@ void framebuffer_resize(struct framebuffer *framebuffer, int width, int height)
         &new_framebuffer,
         framebuffer->width,
         framebuffer->height,
-        framebuffer->width / 2,
-        framebuffer->height / 2,
+        0,
+        0,
         framebuffer->reds,
         framebuffer->greens,
         framebuffer->blues
 	);
 
-    table_free(&(framebuffer->table));
+    framebuffer_free(framebuffer);
 
     *framebuffer = new_framebuffer;
 }
@@ -63,7 +69,7 @@ void framebuffer_clear(struct framebuffer *framebuffer)
 
     int n_pixel = framebuffer->width * framebuffer->height;
 
-    memset(framebuffer->z_buffer, false, sizeof(bool) * n_pixel);
+    memset(framebuffer->z_buffer, false, sizeof (bool) * n_pixel);
 }
 
 void framebuffer_burn(
@@ -80,6 +86,8 @@ void framebuffer_burn(
     assert(reds   != NULL);
     assert(greens != NULL);
     assert(blues  != NULL);
+    assert(width  > 0);
+    assert(height > 0);
 
     int n_pixel = width * height;
 
@@ -99,9 +107,9 @@ void framebuffer_burn(
             && framebuffer_y <  framebuffer->height
             && false == framebuffer->z_buffer[framebuffer_pixel_i]
         ) {
-			framebuffer->reds[  framebuffer_pixel_i]   = reds  [pixel_i];
-			framebuffer->greens[framebuffer_pixel_i]   = greens[pixel_i];
-			framebuffer->blues[ framebuffer_pixel_i]   = blues [pixel_i];
+			framebuffer->reds    [framebuffer_pixel_i] = reds  [pixel_i];
+			framebuffer->greens  [framebuffer_pixel_i] = greens[pixel_i];
+			framebuffer->blues   [framebuffer_pixel_i] = blues [pixel_i];
             framebuffer->z_buffer[framebuffer_pixel_i] = true;
         }
         // XXX Consider CPU bubbling of an `if` clause in a tight loop.
@@ -118,9 +126,11 @@ void framebuffer_render(struct framebuffer *framebuffer)
     float *blues    = framebuffer->blues;
     bool  *z_buffer = framebuffer->z_buffer;
 
-    assert(reds   != NULL);
-    assert(greens != NULL);
-    assert(blues  != NULL);
+    assert(n_pixel > 0);
+    assert(reds     != NULL);
+    assert(greens   != NULL);
+    assert(blues    != NULL);
+    assert(z_buffer != NULL);
 
     for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
     {
