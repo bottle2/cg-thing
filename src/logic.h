@@ -7,6 +7,7 @@
 
 #include "gui.h"
 
-void logic_init(struct gui *gui);
+void logic_init  (struct gui *gui);
+void logic_kludge(struct gui *gui);
 
 #endif // __T1__LOGIC__H__

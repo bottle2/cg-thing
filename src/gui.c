@@ -42,8 +42,11 @@ void gui_mouse(struct gui *gui, union vector screen, struct input_mouse mouse)
 {
     assert(gui != NULL);
 
-    if (menus_mouse (&(gui->menus ), screen, mouse            )) return;
-    if (images_mouse(&(gui->images), screen, mouse, gui->shift)) return;
+    if (menus_mouse (&(gui->menus ), screen, mouse            )) goto end;
+    if (images_mouse(&(gui->images), screen, mouse, gui->shift)) goto end;
+
+end:
+    logic_kludge(gui);
 }
 
 void gui_render(struct gui *gui, union vector screen)

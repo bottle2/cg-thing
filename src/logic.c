@@ -162,3 +162,11 @@ void logic_init(struct gui *gui)
     menus->menu_active_id = MAIN;
 }
 
+void logic_kludge(struct gui *gui)
+{
+	if (gui->menus.menu_active_id & MAIN)
+	{
+		gui->menus.menu_active_id = gui->images.n_selected > 0 ? ALL : MAIN;
+	}
+}
+
