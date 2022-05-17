@@ -10,19 +10,16 @@
 
 #include "gui.h"
 #include "input.h"
-#include "logic.h"
+#include "vector.h"
 
-#define BACKGROUND 0.0f, 0.0f, 0.0f
-
-int screen_width = 800, screen_height = 600;
-static struct gui gui;
+static union  vector screen = { .width = 800, .height = 800 };
+static struct gui    gui    = { 0 };
 
 void render(void)
 {
-    cv_clear(BACKGROUND);
+    cv_clear(0.0f, 0.0f, 0.0f);
 
-    gui_dimensions(&gui, screen_width, screen_height);
-    gui_render(&gui);
+    gui_render(&gui, screen);
 }
 
 void keyboard(int key)
@@ -37,30 +34,15 @@ void keyboardUp(int key)
 
 void mouse(int button, int state, int wheel, int direction, int x, int y)
 {
-    gui_dimensions(&gui, screen_width, screen_height);
-    gui_mouse(&gui, x, y, (enum input_mouse)button, (enum input_state)state);
-
-    if (INPUT_SCROLL_YES == wheel)
-    {
-        gui_scroll(&gui, (enum input_direction)direction);
-    }
-
-    if (INPUT_PRESSED == state && INPUT_MOUSE_LEFT == button)
-    {
-        logic_kludge(&gui);
-    }
+    struct input_mouse mouse = { x, y, button, state, wheel, direction };
+    gui_mouse(&gui, screen, mouse);
 }
 
 int main(void)
 {
     gui_init(&gui);
-
-    logic(&gui);
-
-    cv_init(&screen_width, &screen_height, "Manipulação de imagens");
-
+    cv_init(&(screen.width), &(screen.height), "Manipulação de imagens");
     cv_run();
-
     gui_deinit(&gui);
 
     return 0;

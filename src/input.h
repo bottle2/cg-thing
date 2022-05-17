@@ -2,6 +2,7 @@
 #define __T1__INPUT__H__
 
 // Human readable constants rather than magic numbers.
+// Helper structs below.
 
 enum
 {
@@ -17,7 +18,7 @@ enum input_state
     INPUT_RELEASED = 1,
 };
 
-enum input_mouse
+enum input_mouse_button
 {
     INPUT_MOUSE_LEFT   = 0,
     INPUT_MOUSE_MIDDLE = 1,
@@ -33,6 +34,22 @@ enum input_direction
 {
     INPUT_UPWARDS   =  1,
     INPUT_DOWNWARDS = -1,
+};
+
+struct input_mouse
+{
+    int x;
+    int y;
+    enum input_mouse_button button;
+    enum input_state        state;
+    enum input_scroll       scroll;
+    enum input_direction    direction;
+};
+
+struct input_key
+{
+    int              keycode;
+    enum input_state state;
 };
 
 #endif // __T1__INPUT__H__

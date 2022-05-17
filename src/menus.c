@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stddef.h>
-#include <stdio.h> // XXX Remover
 #include <string.h>
 
 #include "gl_canvas2d.h"
@@ -8,17 +7,13 @@
 #include "menus.h"
 #include "util.h"
 
-#define FOREGROUND 1.0f, 1.0f, 1.0f
-
 static int menus_next_unnocupied(struct menus *menus); // Checks for bounds.
 
 void menus_init(struct menus *menus)
 {
     menus->absolute_item_i_chosen = -1;
-
-    menus->max_item = 0;
-
-    menus->width = 0;
+    menus->max_item               =  0;
+    menus->width                  =  0;
 
     for (int item_i = 0; item_i < ITEM_CAPACITY; item_i++)
     {
@@ -85,38 +80,53 @@ void menus_add_button(
     menus->width = MAX_2(menus->width, strlen(text_hover));
 }
 
-void menus_clear(struct menus *menus, int menu_id)
+int menus_mouse(struct menus *menus, union vector screen, struct input_mouse mouse)
 {
     assert(menus != NULL);
-    assert(menu_id != 0);
 
-    for (int item_i = menus->max_item; item_i >= 0; item_i--)
+    int relative_y = (screen.height - mouse.y) / FONT_HEIGHT;
+
+    menus->absolute_item_i_chosen = -1;
+
+    for (int item_i = 0, relative_i = 0; item_i <= menus->max_item; item_i++)
     {
-        if (menus->items_menu_id[item_i] & menu_id)
+        if (menus->items_menu_id[item_i] & menus->menu_active_id)
         {
-            menus->items_type[item_i]       = ITEM_NONE;
-            menus->items_menu_id[item_i]    = ITEM_ID_UNNOCUPIED;
-            menus->items_text[item_i]       = NULL;
-            menus->items_text_hover[item_i] = NULL;
-            menus->items_callback[item_i]   = NULL;
-            menus->items_data_id[item_i]    = -1;
+            if (mouse.x < menus->width * (FONT_WIDTH + FONT_KERNING)
+                && relative_y == relative_i
+                && ITEM_BUTTON == menus->items_type[item_i]
+            ) {
 
-            if (item_i == menus->max_item - 1)
-            {
-                menus->max_item = item_i;
+                if (INPUT_PRESSED == mouse.state
+                    && INPUT_MOUSE_LEFT == mouse.button
+                    && ITEM_BUTTON == menus->items_type[item_i]
+                ) {
+                    int data_id = menus->items_data_id[item_i];
+                    menus->items_callback[item_i](menus->data[data_id]);
+                }
+                else
+                {
+                    menus->absolute_item_i_chosen = item_i;
+                }
+                // Handles clicks.
+
+                return 1;
             }
-            // Decrease `max_item` if removing the last item.
+            // Checks for mouse hover. 
+
+            relative_i++;
         }
+        // We iterate only over items from active menu.
     }
 
-    // TODO Update `menus->width`.
+    return 0;
 }
 
-void menus_render(struct menus *menus, int screen_height)
+void menus_render(struct menus *menus, union vector screen)
 {
     assert(menus->menu_active_id != 0);
 
-    cv_color_rgb(FOREGROUND);
+    cv_color_rgb(1.0f, 1.0f, 1.0f);
 
     int actual_item_i = 0;
 
@@ -131,44 +141,10 @@ void menus_render(struct menus *menus, int screen_height)
                          ? menus->items_text_hover[item_i]
                          : menus->items_text[item_i];
 
-        cv_text(0, (float)(screen_height - (actual_item_i + 1) * FONT_HEIGHT), text);
+        cv_text(0, (float)(screen.height - (actual_item_i + 1) * FONT_HEIGHT), text);
 
         actual_item_i++;
     }
-}
-
-int menus_trace(struct menus *menus, int screen_height, int x, int y)
-{
-    int relative_y = (screen_height - y) / FONT_HEIGHT;
-
-    menus->absolute_item_i_chosen = -1;
-
-    for (int item_i = 0, relative_i = 0; item_i <= menus->max_item; item_i++)
-    {
-        if (menus->items_menu_id[item_i] & menus->menu_active_id)
-        {
-            if(x < menus->width * (FONT_WIDTH + FONT_KERNING) && relative_y == relative_i && ITEM_BUTTON == menus->items_type[item_i])
-            {
-                menus->absolute_item_i_chosen = item_i;
-                return item_i;
-            }
-
-            relative_i++;
-        }
-    }
-
-    return -1;
-}
-
-int menus_click(struct menus *menus)
-{
-    if (ITEM_BUTTON == menus->items_type[menus->absolute_item_i_chosen])
-    {
-        int data_id = menus->items_data_id[menus->absolute_item_i_chosen];
-        menus->items_callback[menus->absolute_item_i_chosen](menus->data[data_id]);
-        return 0;
-    }
-    return 1;
 }
 
 static int menus_next_unnocupied(struct menus *menus)

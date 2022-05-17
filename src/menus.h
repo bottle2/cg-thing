@@ -1,6 +1,9 @@
 #ifndef __T1__MENUS__H__
 #define __T1__MENUS__H__
 
+#include "input.h"
+#include "vector.h"
+
 // Manages menus. Creation, rendering, mouse input and callback calling.
 // NOTE Module refactored out of gui module, may contain "rabos" left over.
 
@@ -58,12 +61,7 @@ void menus_add_button(
     int           data_id
 );
 
-void menus_clear(struct menus *menus, int menu_id);
-// List creation functions.
-// Notice you can only add items or clear an entire list.
-
-void menus_render(struct menus *menus, int screen_height);
-int  menus_trace(struct menus *menus, int screen_height, int x, int y);
-int  menus_click(struct menus *menus);
+int  menus_mouse (struct menus *menus, union vector screen, struct input_mouse mouse);
+void menus_render(struct menus *menus, union vector screen);
 
 #endif // __T1__MENUS__H__

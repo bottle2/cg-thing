@@ -11,6 +11,7 @@
 #include "bmp.h"
 #include "framebuffer.h"
 #include "images.h"
+#include "input.h"
 #include "safe.h"
 #include "select.h"
 
@@ -18,9 +19,9 @@ void images_init(struct images *images)
 {
     assert(images != NULL);
 
-    images->n_image                 = 0;
-    images->n_selected              = 0;
-    images->is_moving               = false;
+    images->n_image    = 0;
+    images->n_selected = 0;
+    images->is_moving  = false;
 
     select_init(&(images->select));
 }
@@ -148,7 +149,7 @@ void images_compute(struct images *images)
     }
 }
 
-void images_render(struct images *images, int screen_width, int screen_height)
+void images_render(struct images *images, union vector screen)
 {
     assert(images != NULL);
     assert(images->n_image >= 0);
@@ -158,13 +159,9 @@ void images_render(struct images *images, int screen_width, int screen_height)
 
     struct framebuffer framebuffer = { 0 };
 
-    framebuffer_init(&framebuffer, screen_width, screen_height);
+    framebuffer_init(&framebuffer, screen.width, screen.height);
 
-#if 0
-    for (int image_i = 0; image_i < images->n_image; image_i++)
-#else
     for (int image_i = images->n_image - 1; image_i >= 0; image_i--)
-#endif
     {
         float *reds   = images->per_image_cache_reds[image_i];
         float *greens = images->per_image_cache_greens[image_i];
@@ -182,21 +179,6 @@ void images_render(struct images *images, int screen_width, int screen_height)
         assert(width  > 0);
         assert(height > 0);
 
-#if 0
-        for (int pixel_i = 0; pixel_i < width * height; pixel_i++)
-        {
-            int pixel_x = pixel_i % width;
-            int pixel_y = pixel_i / width;
-
-            cv_color_rgba(reds[pixel_i], greens[pixel_i], blues[pixel_i], 20.0f);
-            cv_rectFill(
-                (float)(pixel_x + x     + (is_selected ? offset_x : 0)),
-                (float)(pixel_y + y     + (is_selected ? offset_y : 0)),
-                (float)(pixel_x + x + 1 + (is_selected ? offset_x : 0)),
-                (float)(pixel_y + y + 1 + (is_selected ? offset_y : 0))
-            );
-        }
-#else
         framebuffer_burn(
             &framebuffer,
             width,
@@ -207,7 +189,6 @@ void images_render(struct images *images, int screen_width, int screen_height)
             greens,
             blues
         );
-#endif
     }
 
     framebuffer_render(&framebuffer);
@@ -257,9 +238,9 @@ void images_free(struct images *images)
     images->n_image = 0;
 }
 
-int images_trace(struct images *images, int x, int y)
+int images_mouse(struct images *images, union vector screen, struct input_mouse mouse, enum input_state shift)
 {
-    images->hovered_i = -1;
+    int hovered_i = -1;
 
     for (int image_i = images->n_image - 1; image_i >= 0; image_i--)
     {
@@ -268,32 +249,23 @@ int images_trace(struct images *images, int x, int y)
         int image_x = images->xs[image_i];
         int image_y = images->ys[image_i];
 
-        bool within_x = x <= image_x + width  / 2.0f && x >= image_x - width  / 2.0f;
-        bool within_y = y <= image_y + height / 2.0f && y >= image_y - height / 2.0f;
+        bool within_x = mouse.x <= image_x + width  / 2.0f && mouse.x >= image_x - width  / 2.0f;
+        bool within_y = mouse.y <= image_y + height / 2.0f && mouse.y >= image_y - height / 2.0f;
 
         if (within_x && within_y)
         {
-            images->hovered_i = image_i;
+            hovered_i = image_i;
             break;
         }
     }
-    return images->hovered_i;
-}
+    // Checks if mouse is hovering any image.
 
-void images_click(
-    struct images    *images,
-    int               x,
-    int               y,
-    enum input_state  state,
-    bool              is_multi
-) {
-    enum select_action action = select_step(
-        &(images->select),
-        x,
-        y,
-        state, images->hovered_i != -1, is_multi,
-        images->is_selecteds[images->hovered_i]
-    );
+    struct select *select            = &(images->select);
+    bool           is_hovering       = hovered_i != -1;
+    bool           is_multi          = INPUT_PRESSED == shift;
+    bool           is_hover_selected = is_hovering && images->is_selecteds[hovered_i];
+
+    enum select_action action = select_step(select, mouse.x, mouse.y, mouse.state, is_hovering, is_multi, is_hover_selected);
 
     if (SELECT_OFFSET_USE == action)
     {
@@ -324,16 +296,18 @@ void images_click(
 
     if (SELECT_DESELECT_ALL_EXCEPT == action || SELECT_SELECT_TOO == action)
     {
-        images->is_selecteds[images->hovered_i] = true;
+        images->is_selecteds[hovered_i] = true;
         images->n_selected++;
     }
 
     if (SELECT_DESELECT_ONLY == action)
     {
-        images->is_selecteds[images->hovered_i] = false;
+        images->is_selecteds[hovered_i] = false;
 
         images->n_selected--;
     }
+
+    return is_hovering;
 }
 
 void images_toggle(struct images *images, enum channel channel)
@@ -347,7 +321,7 @@ void images_toggle(struct images *images, enum channel channel)
                 case CHANNEL_RED:   images->actives_red  [image_i] = !images->actives_red[image_i];   break;
                 case CHANNEL_GREEN: images->actives_green[image_i] = !images->actives_green[image_i]; break;
                 case CHANNEL_BLUE:  images->actives_blue [image_i] = !images->actives_blue[image_i];  break;
-                default:            assert(!"Invalid channel!");                    break;
+                default:            assert(!"Invalid channel!");                                      break;
             }
         }
     }

@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "gui.h"
 #include "images.h"
 #include "logic.h"
+#include "menus.h"
 
 #define MAX_FILES_PER_TIME 15
 
@@ -100,8 +102,8 @@ static void callback_list_files(void *data)
     struct gui    *gui    = (struct gui *)data;
     struct images *images = &(gui->images);
 
-    int x = gui->screen_width  / 2;
-    int y = gui->screen_height / 2;
+    int x = 400;
+    int y = 400;
 
     #if 0
     images_load(images, "a.bmp");
@@ -118,7 +120,7 @@ static void callback_list_files(void *data)
     images_load(images, PREFIX "resources/blackbuck.bmp", x, y);
 }
 
-void logic(struct gui *gui)
+void logic_init(struct gui *gui)
 {
     struct menus *menus = &(gui->menus);
 
@@ -160,10 +162,3 @@ void logic(struct gui *gui)
     menus->menu_active_id = MAIN;
 }
 
-void logic_kludge(struct gui *gui)
-{
-    if (gui->menus.menu_active_id & MAIN)
-    {
-        gui->menus.menu_active_id = gui->images.n_selected > 0 ? ALL : MAIN;
-    }
-}

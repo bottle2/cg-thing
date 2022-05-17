@@ -7,7 +7,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "input.h"
 #include "select.h"
+#include "vector.h"
 
 #define IMAGE_CAPACITY 256
 #define N_TONE         256
@@ -19,10 +21,10 @@ struct images
     int   n_image;
     char *pathnames[IMAGE_CAPACITY];
 
-    int widths   [IMAGE_CAPACITY];
-    int heights  [IMAGE_CAPACITY];
-    int xs       [IMAGE_CAPACITY];
-    int ys       [IMAGE_CAPACITY];
+    int widths [IMAGE_CAPACITY];
+    int heights[IMAGE_CAPACITY];
+    int xs     [IMAGE_CAPACITY];
+    int ys     [IMAGE_CAPACITY];
 
     uint8_t *per_image_reds        [IMAGE_CAPACITY];
     uint8_t *per_image_greens      [IMAGE_CAPACITY];
@@ -42,19 +44,16 @@ struct images
 
     struct select select;
     bool          is_moving;
-    int           hovered_i;
 };
 // Images' data is associated by their position in the arrays.
 
 void images_init   (struct images *images);
 int  images_load   (struct images *images, char const *pathname, int x, int y);
 void images_compute(struct images *images);
-void images_render (struct images *images, int screen_width, int screen_height);
 void images_free   (struct images *images);
-int  images_trace  (struct images *images, int x, int y);
-void images_click  (struct images *images, int x, int y
-                                         , enum input_state mouse_state
-                                         , bool is_multi);
+
+int  images_mouse  (struct images *images, union vector screen, struct input_mouse mouse, enum input_state shift);
+void images_render (struct images *images, union vector screen);
 
 void images_toggle   (struct images *images, enum channel channel);
 void images_reset    (struct images *images);
