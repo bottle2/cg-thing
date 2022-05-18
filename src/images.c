@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdio.h>
+
 #include "gl_canvas2d.h"
 
 #include "bmp.h"
@@ -13,6 +15,7 @@
 #include "safe.h"
 #include "select.h"
 #include "sources.h"
+#include "util.h"
 
 void images_init(struct images *images)
 {
@@ -93,6 +96,8 @@ void images_compute(struct images *images)
             bool active_blue  = images->actives_blue [image_i];
             bool is_grayscale = images->grayscales   [image_i];
             bool is_inverted  = images->inverteds    [image_i];
+            bool is_fdct      = images->fdcts        [image_i];
+            bool is_idct      = images->idcts        [image_i];
 
             assert(width  > 0);
             assert(height > 0);
@@ -127,6 +132,101 @@ void images_compute(struct images *images)
                     cache_blues[pixel_i]  = 1.0f - cache_blues[pixel_i];
                 }
             }
+
+            if (is_fdct && 0 == width % 8 && 0 == height % 8)
+            {
+                double biggest_pix = -100000.0f;
+                double smallest_pix = 100000.0f;
+
+                for (int block_i = 0; block_i < width / 8; block_i++)
+                {
+                    for (int block_j = 0; block_j < height / 8; block_j++)
+                    {
+                        double block[8][8] = {0};
+
+                        for (int u = 0; u < 8; u++)
+                        {
+                            for (int v = 0; v < 8; v++)
+                            {
+                                double pix = 0.0f;
+
+                                for (int x = 0; x < 8; x++)
+                                {
+                                    for (int y = 0; y < 8; y++)
+                                    {
+                                        pix += cache_reds[block_i * 8 + x + block_j * 8 * width + y * width]
+                                            * cos(((2.0 * (double)x + 1.0f) * PI * (double)u) / 16.0f)
+                                            * cos(((2.0 * (double)y + 1.0f) * PI * (double)v) / 16.0f);
+                                    }
+                                }
+                                block[u][v] = (pix / 4.0f); // *C(u) *C(v);
+
+                                smallest_pix = MIN_2(smallest_pix, pix);
+                                biggest_pix = MAX_2(biggest_pix, pix);
+                            }
+                        }
+
+                        for (int x = 0; x < 8; x++)
+                        {
+                            for (int y = 0; y < 8; y++)
+                            {
+                                cache_reds  [block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                                cache_greens[block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                                cache_blues [block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                            }
+                        }
+
+                        // HERE STARTS IDCT (god forgive me my sins).
+
+                        if (is_idct)
+                        {
+                            for (int u = 0; u < 8; u++)
+                            {
+                                for (int v = 0; v < 8; v++)
+                                {
+                                    double pix = 0.0f;
+
+                                    for (int x = 0; x < 8; x++)
+                                    {
+                                        for (int y = 0; y < 8; y++)
+                                        {
+                                            pix += cache_reds[block_i * 8 + x + block_j * 8 * width + y * width]
+                                                * cos(((2.0 * (double)x + 1.0f) * PI * (double)u) / 16.0f)
+                                                * cos(((2.0 * (double)y + 1.0f) * PI * (double)v) / 16.0f);
+                                        }
+                                    }
+                                    block[u][v] = (pix / 4.0f); // *C(u) *C(v);
+                                }
+                            }
+
+                            for (int x = 0; x < 8; x++)
+                            {
+                                for (int y = 0; y < 8; y++)
+                                {
+                                    cache_reds  [block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                                    cache_greens[block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                                    cache_blues [block_i * 8 + x + block_j * 8 * width + y * width] = block[x][y];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                printf("biggest pix: %f\n", biggest_pix);
+                printf("smallest pix: %f\n", smallest_pix);
+
+                if (is_fdct && !is_idct)
+                {
+                    for (int pixel_i = 0; pixel_i < n_pixel; pixel_i++)
+                    {
+                        float new_value = (cache_blues[pixel_i] - smallest_pix) / (biggest_pix - smallest_pix);
+                        cache_reds  [pixel_i] = new_value;
+                        cache_greens[pixel_i] = new_value;
+                        cache_blues [pixel_i] = new_value;
+                    }
+                }
+            }
+            // FDCT "thing".
         }
     }
 }
@@ -350,6 +450,35 @@ void images_invert(struct images *images)
         if (images->is_selecteds[image_i])
         {
             images->inverteds[image_i] = !images->inverteds[image_i];
+        }
+    }
+
+    images_compute(images);
+}
+
+void images_fdct(struct images *images)
+{
+    for (int image_i = 0; image_i < images->n_image; image_i++)
+    {
+        if (images->is_selecteds[image_i])
+        {
+            images->grayscales[image_i] = true;
+            images->fdcts[image_i]      = !images->fdcts[image_i];
+        }
+    }
+
+    images_compute(images);
+}
+
+void images_idct(struct images *images)
+{
+    for (int image_i = 0; image_i < images->n_image; image_i++)
+    {
+        if (images->is_selecteds[image_i])
+        {
+            images->grayscales[image_i] = true;
+            images->fdcts[image_i]      = true;
+            images->idcts[image_i]      = !images->idcts[image_i];
         }
     }
 

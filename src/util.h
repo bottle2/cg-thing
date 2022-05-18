@@ -6,5 +6,6 @@
 // - Increment ++ or decrement -- operators.
 
 #define MAX_2(A, B) ((A) > (B) ? (A) : (B))
+#define MIN_2(A, B) ((A) < (B) ? (A) : (B))
 
 #endif // __T2__UTIL__H__

@@ -38,6 +38,8 @@ struct images
     bool actives_blue [IMAGE_CAPACITY];
     bool grayscales   [IMAGE_CAPACITY];
     bool inverteds    [IMAGE_CAPACITY];
+    bool fdcts        [IMAGE_CAPACITY];
+    bool idcts        [IMAGE_CAPACITY];
 
     bool is_selecteds[IMAGE_CAPACITY];
     int  n_selected;
@@ -59,5 +61,7 @@ void images_toggle   (struct images *images, enum channel channel);
 void images_reset    (struct images *images);
 void images_grayscale(struct images *images);
 void images_invert   (struct images *images);
+void images_fdct     (struct images *images);
+void images_idct     (struct images *images);
 
 #endif // __T1__IMAGES__H__

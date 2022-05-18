@@ -97,6 +97,20 @@ static void callback_invert(void *data)
     images_invert((struct images *)data);
 }
 
+static void callback_fdct(void *data)
+{
+    assert(data != NULL);
+
+    images_fdct((struct images *)data);
+}
+
+static void callback_idct(void *data)
+{
+    assert(data != NULL);
+
+    images_idct((struct images *)data);
+}
+
 static void callback_list_files(void *data)
 {
     struct gui    *gui    = (struct gui *)data;
@@ -149,6 +163,8 @@ void logic_init(struct gui *gui)
     //menus_add_button(menus, IMAGE, "  Rotate counterclockwise", "> Rotate counterclockwise", callback_placeholder, 0);
     //menus_add_button(menus, IMAGE, "  Brighten"               , "> Brighten"               , callback_placeholder, 0);
     //menus_add_button(menus, IMAGE, "  Darken"                 , "> Darken"                 , callback_placeholder, 0);
+    menus_add_button(menus, IMAGE, "  Toggle FDCT"            , "> Toggle FDCT"            , callback_fdct        , DATA_IMAGES);
+    menus_add_button(menus, IMAGE, "  Toggle IDCT after FDCT" , "> Toggle IDCT after FDCT" , callback_idct        , DATA_IMAGES);
 
     menus_add_button(menus, HELP, "  Go back", "< Go back", callback_to_main, DATA_MENUS);
     menus_add_text  (menus, HELP, "Click on images to select them.");
